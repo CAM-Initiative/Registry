@@ -1,0 +1,63 @@
+name: Inspect Transluce visual evidence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-transluce-visuals.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+          show-progress: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Inspect source visuals
+        run: |
+          cat > inspect-visuals.js <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:1200},locale:'en-US'});
+            const r=await page.goto('https://transluce.org/agent-activity',{waitUntil:'networkidle',timeout:90000});
+            if(!r||r.status()>=400) throw new Error('load failed');
+            const els=await page.locator('figure,svg,canvas,img,[class*="Figure"],[class*="figure"],[class*="chart"],[class*="Chart"],[class*="timeline"],[class*="Timeline"]').evaluateAll(nodes=>nodes.map((n,i)=>{
+              const b=n.getBoundingClientRect();
+              let h=n.previousElementSibling;
+              let prev=[];
+              for(let j=0;j<5&&h;j++,h=h.previousElementSibling){
+                const t=(h.innerText||'').replace(/\s+/g,' ').trim();
+                if(t) prev.push(t.slice(0,600));
+              }
+              return {
+                i,tag:n.tagName,cls:n.className?.baseVal||n.className||'',
+                x:Math.round(b.x),y:Math.round(b.y+window.scrollY),w:Math.round(b.width),h:Math.round(b.height),
+                text:(n.innerText||'').replace(/\s+/g,' ').trim().slice(0,1800),
+                prev
+              };
+            }));
+            console.log('VISUALS',JSON.stringify(els));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1);});
+          JS
+          node inspect-visuals.js
+      - name: Remove workflow
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/inspect-transluce-visuals.yml
+          git commit -m "Remove Transluce visual inspection workflow" || true
+          git push || true
