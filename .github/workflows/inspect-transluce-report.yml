@@ -24,7 +24,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Inspect Transluce page
+      - name: Inspect Transluce hacking section
         run: |
           cat > inspect-transluce.js <<'JS'
           const { chromium } = require('playwright');
@@ -37,57 +37,58 @@ jobs:
               colorScheme: 'light',
               locale: 'en-US'
             });
+            const response = await page.goto('https://transluce.org/agent-activity', { waitUntil: 'networkidle', timeout: 90000 });
+            if (!response || response.status() >= 400) throw new Error('Failed to load report');
 
-            const url = 'https://transluce.org/agent-activity';
-            const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 90000 });
-            if (!response || response.status() >= 400) throw new Error('Failed to load Transluce report');
-
-            console.log('TITLE', await page.title());
-            const heads = await page.locator('h1,h2,h3,h4').evaluateAll(nodes =>
-              nodes.map((n,i)=>({i,tag:n.tagName,text:(n.innerText||'').trim()}))
-            );
-            console.log('HEADINGS', JSON.stringify(heads));
-
-            const imgs = await page.locator('img').evaluateAll(nodes =>
-              nodes.map((n,i)=>({i,alt:n.alt||'',src:n.getAttribute('src')||'',w:n.naturalWidth,h:n.naturalHeight}))
-            );
-            console.log('IMAGES', JSON.stringify(imgs));
+            const h2 = page.getByRole('heading', { name: 'Hacking attempts against public data providers' });
+            const section = await h2.evaluate(el => {
+              const rows = [];
+              let n = el;
+              for (let i=0; i<50 && n; i++, n=n.nextElementSibling) {
+                const r=n.getBoundingClientRect();
+                rows.push({
+                  i,
+                  tag:n.tagName,
+                  cls:n.className||'',
+                  y:Math.round(r.y+window.scrollY),
+                  h:Math.round(r.height),
+                  text:(n.innerText||'').replace(/\s+/g,' ').trim().slice(0,1800)
+                });
+                if (i>0 && n.tagName==='H2') break;
+              }
+              return rows;
+            });
+            console.log('SECTION', JSON.stringify(section));
 
             const needles = [
               'University of New Mexico',
               'Data USA',
-              'Australian Institute of Health and Welfare'
+              'Australian Institute of Health and Welfare',
+              'None of the hacking attempts we identified appear to have succeeded'
             ];
             for (const needle of needles) {
-              const h = page.getByRole('heading', { name: new RegExp(needle, 'i') }).first();
-              console.log('MATCH', needle, 'count=', await h.count());
-              if (await h.count()) {
-                const info = await h.evaluate(el => {
-                  let cur = el;
-                  const trail = [];
-                  for (let i=0; i<5 && cur; i++, cur=cur.parentElement) {
-                    trail.push({
-                      tag: cur.tagName,
-                      cls: cur.className || '',
-                      text: (cur.innerText || '').replace(/\s+/g,' ').slice(0,1800),
-                      html: (cur.outerHTML || '').slice(0,5000)
+              const loc = page.getByText(needle, { exact:false }).first();
+              console.log('MATCH', needle, 'count=', await loc.count());
+              if (await loc.count()) {
+                const trail=await loc.evaluate(el=>{
+                  let cur=el;
+                  const out=[];
+                  for(let i=0;i<6 && cur;i++,cur=cur.parentElement){
+                    const r=cur.getBoundingClientRect();
+                    out.push({
+                      tag:cur.tagName,
+                      cls:cur.className||'',
+                      y:Math.round(r.y+window.scrollY),
+                      h:Math.round(r.height),
+                      text:(cur.innerText||'').replace(/\s+/g,' ').trim().slice(0,2200)
                     });
                   }
-                  return trail;
+                  return out;
                 });
-                console.log('ANCESTORS', needle, JSON.stringify(info));
+                console.log('TRAIL', needle, JSON.stringify(trail));
               }
             }
-
             await browser.close();
-          })().catch(err => { console.error(err); process.exit(1); });
+          })().catch(err=>{console.error(err);process.exit(1);});
           JS
           node inspect-transluce.js
-
-      - name: Remove one-shot workflow
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/inspect-transluce-report.yml
-          git commit -m "Remove one-shot Transluce inspection workflow"
-          git push
