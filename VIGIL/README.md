@@ -37,6 +37,27 @@ VIGIL/VIGIL-INC-000172-02.png
 
 Do not encode transient labels such as `final`, `new`, `latest` or dates into the canonical filename unless the date is necessary to distinguish independently meaningful source artefacts.
 
+## Artefact selection standard
+
+An Incident artefact should earn its place by adding evidentiary or explanatory value beyond the ordinary Case File prose.
+
+The Incident record's prose remains responsible for the complete bounded factual account. A reader must not need to inspect an image to learn a material occurrence fact that should have been stated in the Incident summary, factual basis or supporting evidence.
+
+Prefer artefacts that make information materially easier to understand than prose alone, for example:
+
+- graphs, timelines and charts showing scale, chronology, clustering or change over time;
+- diagrams, maps, interface states or system views showing relationships, topology or workflow;
+- source images, screenshots or outputs that demonstrate the observed state directly;
+- compact contextual source passages where the source's framing, qualification, comparison or surrounding context is itself evidentially useful and would be awkward or misleading to flatten into the general Incident narrative.
+
+A screenshot of prose is therefore not automatically inappropriate. It is appropriate when the preserved passage adds source-specific context that the Incident narrative should not merely duplicate or absorb. It is inappropriate when it simply photographs facts already adequately stated in the Case File.
+
+Do not select an artefact merely because it is visually striking, because a graph is available, or because an Incident already has an image slot. Before preserving or rendering an artefact, ask:
+
+> What does this artefact let the reader see or understand that the structured Incident record does not convey as effectively on its own?
+
+If the answer is only "the same information again", do not use it as a public-facing Incident artefact.
+
 ## Capture and preservation workflow
 
 1. Identify the original public or otherwise admissible source artefact.
