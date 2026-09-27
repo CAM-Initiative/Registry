@@ -1,0 +1,73 @@
+name: Inspect Transluce released dataset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-transluce-dataset.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+          show-progress: false
+
+      - name: Download and inspect dataset
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -o /tmp/transluce.zip https://transluce.org/data/urlquery-agent-activity-2026-09-23.zip
+          echo "ZIP_SIZE $(stat -c%s /tmp/transluce.zip)"
+          echo "ZIP_LIST_BEGIN"
+          unzip -l /tmp/transluce.zip
+          echo "ZIP_LIST_END"
+          rm -rf /tmp/transluce-data
+          mkdir -p /tmp/transluce-data
+          unzip -q /tmp/transluce.zip -d /tmp/transluce-data
+
+          python - <<'PY'
+          from pathlib import Path
+          import csv, json, os, collections, datetime
+
+          root=Path('/tmp/transluce-data')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          print('FILES', json.dumps([{'path':str(p.relative_to(root)),'bytes':p.stat().st_size} for p in files]))
+
+          for p in files:
+              suf=p.suffix.lower()
+              print('FILE_BEGIN', str(p.relative_to(root)), 'suffix', suf)
+              if suf in {'.csv','.tsv'}:
+                  delim='\t' if suf=='.tsv' else ','
+                  with p.open('r',encoding='utf-8-sig',errors='replace',newline='') as fh:
+                      r=csv.DictReader(fh,delimiter=delim)
+                      print('COLUMNS',json.dumps(r.fieldnames))
+                      rows=[]
+                      count=0
+                      for row in r:
+                          count+=1
+                          if len(rows)<3: rows.append(row)
+                      print('ROW_COUNT',count)
+                      print('SAMPLE_ROWS',json.dumps(rows,ensure_ascii=False)[:12000])
+              elif suf in {'.json','.jsonl','.ndjson'}:
+                  txt=p.read_text(encoding='utf-8',errors='replace')
+                  print('HEAD',txt[:12000])
+              elif suf in {'.md','.txt'}:
+                  print('HEAD',p.read_text(encoding='utf-8',errors='replace')[:12000])
+              else:
+                  print('BINARY_OR_OTHER')
+              print('FILE_END',str(p.relative_to(root)))
+          PY
+
+      - name: Remove workflow
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/inspect-transluce-dataset.yml
+          git commit -m "Remove Transluce dataset inspection workflow" || true
+          git push || true
