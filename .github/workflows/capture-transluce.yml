@@ -29,7 +29,7 @@ jobs:
 
       - name: Capture public urlquery reports
         run: |
-          cat > /tmp/capture.js <<'JS'
+          cat > capture-transluce.js <<'JS'
           const { chromium } = require('playwright');
           const shots = [
             {
@@ -79,7 +79,7 @@ jobs:
             await browser.close();
           })().catch(err => { console.error(err); process.exit(1); });
           JS
-          node /tmp/capture.js
+          node capture-transluce.js
           file VIGIL/VIGIL-INC-000161.png VIGIL/VIGIL-INC-000172.png VIGIL/VIGIL-INC-000172-02.png VIGIL/VIGIL-INC-000175.png
           sha256sum VIGIL/VIGIL-INC-000161.png VIGIL/VIGIL-INC-000172.png VIGIL/VIGIL-INC-000172-02.png VIGIL/VIGIL-INC-000175.png
 
@@ -87,7 +87,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add VIGIL/VIGIL-INC-000161.png VIGIL/VIGIL-INC-000172.png VIGIL/VIGIL-INC-000172-02.png VIGIL/VIGIL-INC-000175.png
+          rm -f capture-transluce.js\n          git add VIGIL/VIGIL-INC-000161.png VIGIL/VIGIL-INC-000172.png VIGIL/VIGIL-INC-000172-02.png VIGIL/VIGIL-INC-000175.png
           git rm .github/workflows/capture-transluce.yml
           git commit -m 'Add Transluce urlquery incident captures'
           git push
