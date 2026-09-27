@@ -1,0 +1,92 @@
+name: Review Transluce candidate episodes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/review-transluce-candidates.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+          show-progress: false
+      - name: Download and summarize candidate episodes
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -o /tmp/t.zip https://transluce.org/data/urlquery-agent-activity-2026-09-23.zip
+          rm -rf /tmp/t && mkdir -p /tmp/t
+          unzip -q /tmp/t.zip -d /tmp/t
+          python - <<'PY'
+          from pathlib import Path
+          import csv,json,collections,re
+          root=next(Path('/tmp/t').iterdir())
+
+          def loadcsv(name):
+              with (root/name).open(encoding='utf-8-sig',errors='replace',newline='') as f:
+                  return list(csv.DictReader(f))
+          def loadjson(name):
+              return json.loads((root/name).read_text(encoding='utf-8',errors='replace'))
+
+          print('README_BEGIN')
+          print((root/'README.md').read_text(encoding='utf-8',errors='replace')[:12000])
+          print('README_END')
+          for n in ['manifest.json','collection-summary.json','supplement-summary.json']:
+              print(n.upper(),json.dumps(loadjson(n),ensure_ascii=False))
+
+          prov=loadcsv('selection-provenance.csv')
+          print('GROUP_COUNTS',json.dumps(collections.Counter(r['group'] for r in prov),ensure_ascii=False))
+          for group in sorted(set(r['group'] for r in prov)):
+              rows=[r for r in prov if r['group']==group]
+              print('GROUP',group,json.dumps(rows,ensure_ascii=False)[:30000])
+
+          cited=loadcsv('additional-cited-reports.csv')
+          reports=loadcsv('reports.csv')
+          byid={r['report_id']:r for r in reports}
+          byid.update({r['report_id']:r for r in cited})
+
+          needles=['quidax','browserless','mail.gw','boomlify','oncb','narcotics','iea','korea','thrill','nso','email','mailbox','account','otp','trade','crypto']
+          matched=[]
+          for r in prov:
+              blob=' '.join(r.values()).lower()
+              if any(n in blob for n in needles):
+                  x=dict(r)
+                  x['classification']=byid.get(r['report_id'])
+                  matched.append(x)
+          print('TARGETED_PROVENANCE',json.dumps(matched,ensure_ascii=False)[:60000])
+
+          supp=loadjson('supplement-classifications.json')
+          print('SUPPLEMENT_TYPE',type(supp).__name__)
+          # recursively emit objects whose text mentions target concepts
+          hits=[]
+          def walk(x,path=''):
+              if isinstance(x,dict):
+                  blob=json.dumps(x,ensure_ascii=False).lower()
+                  if any(n in blob for n in needles) and len(blob)<20000:
+                      hits.append({'path':path,'value':x})
+                  for k,v in x.items(): walk(v,path+'/'+str(k))
+              elif isinstance(x,list):
+                  for i,v in enumerate(x): walk(v,path+'/'+str(i))
+          walk(supp)
+          # dedupe shallow-ish hits by serialized value
+          seen=set(); uniq=[]
+          for h in hits:
+              s=json.dumps(h['value'],ensure_ascii=False,sort_keys=True)
+              if s in seen: continue
+              seen.add(s); uniq.append(h)
+          print('SUPPLEMENT_TARGETS',json.dumps(uniq[:100],ensure_ascii=False)[:60000])
+          PY
+      - name: Remove workflow
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/review-transluce-candidates.yml
+          git commit -m "Remove Transluce candidate-review workflow" || true
+          git push || true
