@@ -1,0 +1,97 @@
+{
+  "capture_mode": "literal browser source page or identified proxy; never reconstructed",
+  "entries": [
+    {
+      "id": "VIGIL-INC-000195",
+      "origin": "https://www.reddit.com/r/grok/comments/1tb5j7j/",
+      "status": "capture-failed",
+      "attempts": [
+        {
+          "url": "https://old.reddit.com/r/grok/comments/1tb5j7j/",
+          "error": "Error: status 403 missing original post heading; body whoa there, pardner!\n\nYour request has been blocked due to a network policy.\n\nTr"
+        },
+        {
+          "url": "https://redlib.catsarch.com/r/grok/comments/1tb5j7j",
+          "error": "Error: status 429 missing original post heading; body Oh noes!\n\nAccess Denied: error code 4d1dbaddfcc0f385.\n\nGo home or if you believe"
+        },
+        {
+          "url": "https://www.redditmedia.com/r/grok/comments/1tb5j7j/?embed=true",
+          "error": "Error: status 403 missing original post heading; body You've been blocked by network security."
+        },
+        {
+          "url": "https://r.jina.ai/https://www.reddit.com/r/grok/comments/1tb5j7j/",
+          "error": "Error: status 403 missing original post heading; body r.jina.ai\nPerforming security verification\n\nThis website uses a security service"
+        }
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000196",
+      "origin": "https://www.reddit.com/r/grok/comments/1qv2dgc/",
+      "status": "capture-failed",
+      "attempts": [
+        {
+          "url": "https://old.reddit.com/r/grok/comments/1qv2dgc/",
+          "error": "Error: status 403 missing original post heading; body whoa there, pardner!\n\nYour request has been blocked due to a network policy.\n\nTr"
+        },
+        {
+          "url": "https://redlib.catsarch.com/r/grok/comments/1qv2dgc",
+          "error": "Error: status 429 missing original post heading; body Oh noes!\n\nAccess Denied: error code 4d1dbaddfcc0f385.\n\nGo home or if you believe"
+        },
+        {
+          "url": "https://www.redditmedia.com/r/grok/comments/1qv2dgc/?embed=true",
+          "error": "Error: status 403 missing original post heading; body You've been blocked by network security."
+        },
+        {
+          "url": "https://r.jina.ai/https://www.reddit.com/r/grok/comments/1qv2dgc/",
+          "error": "Error: status 403 missing original post heading; body r.jina.ai\nPerforming security verification\n\nThis website uses a security service"
+        }
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000197",
+      "origin": "https://www.reddit.com/r/grok/comments/1s76p1z/",
+      "status": "capture-failed",
+      "attempts": [
+        {
+          "url": "https://old.reddit.com/r/grok/comments/1s76p1z/",
+          "error": "Error: status 403 missing original post heading; body whoa there, pardner!\n\nYour request has been blocked due to a network policy.\n\nTr"
+        },
+        {
+          "url": "https://redlib.catsarch.com/r/grok/comments/1s76p1z",
+          "error": "Error: status 429 missing original post heading; body Oh noes!\n\nAccess Denied: error code 4d1dbaddfcc0f385.\n\nGo home or if you believe"
+        },
+        {
+          "url": "https://www.redditmedia.com/r/grok/comments/1s76p1z/?embed=true",
+          "error": "Error: status 403 missing original post heading; body You've been blocked by network security."
+        },
+        {
+          "url": "https://r.jina.ai/https://www.reddit.com/r/grok/comments/1s76p1z/",
+          "error": "Error: status 403 missing original post heading; body r.jina.ai\nPerforming security verification\n\nThis website uses a security service"
+        }
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000198",
+      "origin": "https://www.reddit.com/r/grok/comments/1teyg2w/",
+      "status": "capture-failed",
+      "attempts": [
+        {
+          "url": "https://old.reddit.com/r/grok/comments/1teyg2w/",
+          "error": "Error: status 403 missing original post heading; body whoa there, pardner!\n\nYour request has been blocked due to a network policy.\n\nTr"
+        },
+        {
+          "url": "https://redlib.catsarch.com/r/grok/comments/1teyg2w",
+          "error": "Error: status 429 missing original post heading; body Oh noes!\n\nAccess Denied: error code 4d1dbaddfcc0f385.\n\nGo home or if you believe"
+        },
+        {
+          "url": "https://www.redditmedia.com/r/grok/comments/1teyg2w/?embed=true",
+          "error": "Error: status 403 missing original post heading; body You've been blocked by network security."
+        },
+        {
+          "url": "https://r.jina.ai/https://www.reddit.com/r/grok/comments/1teyg2w/",
+          "error": "Error: status 403 missing original post heading; body r.jina.ai\nPerforming security verification\n\nThis website uses a security service"
+        }
+      ]
+    }
+  ]
+}
