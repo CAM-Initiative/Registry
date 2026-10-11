@@ -1,0 +1,73 @@
+name: Capture original Reddit post archive evidence
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/capture-reddit-archive-evidence.yml']
+permissions:
+  contents: write
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Preserve archive source pages and unmodified responses
+        run: |
+          cat > capture-archive.cjs <<'JS'
+          const { chromium }=require('playwright'),fs=require('fs');
+          const posts=[
+            {num:'195',post:'1tb5j7j',hint:'Ani'},
+            {num:'196',post:'1qv2dgc',hint:'Grok'},
+            {num:'197',post:'1s76p1z',hint:'Grok'},
+            {num:'198',post:'1teyg2w',hint:'Grok'}
+          ];
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const log=[];
+            for(const t of posts){
+              const id='VIGIL-INC-000'+t.num, origin='https://www.reddit.com/r/grok/comments/'+t.post+'/',
+              endpoints=[
+                'https://arctic-shift.photon-reddit.com/api/posts/ids?ids='+t.post,
+                'https://api.pullpush.io/reddit/search/submission/?ids='+t.post
+              ];
+              let outcome={id,origin,status:'capture-failed',errors:[]};
+              for(const endpoint of endpoints){
+                const page=await browser.newPage({viewport:{width:1480,height:1160},locale:'en-US'});
+                try{
+                  const res=await page.goto(endpoint,{waitUntil:'domcontentloaded',timeout:25000});
+                  const body=await page.locator('body').innerText({timeout:14000});
+                  if(!res||res.status()>=400)throw Error('HTTP '+res?.status());
+                  const json=JSON.parse(body);
+                  const matches=(Array.isArray(json)?json:Array.isArray(json.data)?json.data:Array.isArray(json.posts)?json.posts:[]);
+                  const obj=matches.find(x=>x.id===t.post||x.id==='t3_'+t.post);
+                  if(!obj || !obj.title || !String(obj.subreddit||'').toLowerCase().includes('grok') || !String(obj.title+' '+obj.selftext).toLowerCase().includes(t.hint.toLowerCase()))throw Error('Archive response did not contain matching post: '+body.slice(0,160));
+                  if(!obj.selftext || ['[removed]','[deleted]'].includes(String(obj.selftext).trim()))throw Error('Post text unavailable or deleted in archive');
+                  const filename='VIGIL/'+id;
+                  fs.writeFileSync(filename+'.json',JSON.stringify({archive_endpoint:endpoint,original_source_url:origin,archived_submission:obj,captured_at_utc:new Date().toISOString()},null,2)+'\n');
+                  await page.screenshot({path:filename+'.png',fullPage:false,timeout:20000});
+                  outcome={id,origin,status:'archived-original-post-captured',archive_endpoint:endpoint,title:obj.title,created_utc:obj.created_utc,author:obj.author,archive_json:filename+'.json',archive_screenshot:filename+'.png',capture_type:'literal browser screenshot of archive public JSON response; not a native Reddit UI screenshot',limitations:['Reddit blocks the browser with 403.','The archive is third-party and its capture timestamp and content history may differ from Reddit.','Source authenticity and post context require independent verification.']};
+                  break;
+                }catch(e){outcome.errors.push({endpoint,error:String(e).slice(0,300)})}
+                finally{await page.close()}
+              }
+              log.push(outcome);console.log('ARCHIVE_RESULT '+JSON.stringify(outcome));
+            }
+            await browser.close();
+            fs.writeFileSync('VIGIL/GROK-2026-ARCHIVE-CAPTURE-MANIFEST.json',JSON.stringify({captured_at_utc:new Date().toISOString(),post_count:log.length,post_results:log},null,2)+'\n');
+          })().catch(e=>{console.error(e);process.exit(1)})
+          JS
+          node capture-archive.cjs
+      - name: Commit source evidence and remove workflow
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VIGIL/VIGIL-INC-00019*.png VIGIL/VIGIL-INC-00019*.json VIGIL/GROK-2026-ARCHIVE-CAPTURE-MANIFEST.json || true
+          git rm .github/workflows/capture-reddit-archive-evidence.yml
+          git commit -m 'evidence: archive Grok Reddit source payloads with literal browser captures' || true
+          git push
