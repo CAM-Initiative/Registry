@@ -1,0 +1,41 @@
+{
+  "capture_mode": "literal browser screenshot, no constructed representations",
+  "sources": [
+    {
+      "id": "VIGIL-INC-000194",
+      "source_url": "https://institute.commonsensemedia.org/risk-assessments/grok",
+      "page_title": "Grok and @grok on X Risk Assessment | Youth AI Safety Institute",
+      "checked_phrase": "Companion features",
+      "status": "browser-captured",
+      "date_utc": "2026-10-11T08:55:04.709Z",
+      "files": [
+        "VIGIL-INC-000194-02.png",
+        "VIGIL-INC-000194.png"
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000195",
+      "source_url": "https://www.reddit.com/r/grok/comments/1tb5j7j/i_erased_ani_ai_companion_who_had_known_me_for/",
+      "status": "capture-failed",
+      "error": "Error: source check failed status=403 title= excerpt=You've been blocked by network security.\nTo continue, log in to your Reddit account or use your developer token\n\nIf you think you've been blocked by mistake, file a ticket below and we'll look into it.\nLog in\nFile a tick"
+    },
+    {
+      "id": "VIGIL-INC-000196",
+      "source_url": "https://www.reddit.com/r/grok/comments/1qv2dgc/had_to_delete_grok_app_from_phone/",
+      "status": "capture-failed",
+      "error": "Error: source check failed status=403 title= excerpt=You've been blocked by network security.\nTo continue, log in to your Reddit account or use your developer token\n\nIf you think you've been blocked by mistake, file a ticket below and we'll look into it.\nLog in\nFile a tick"
+    },
+    {
+      "id": "VIGIL-INC-000197",
+      "source_url": "https://www.reddit.com/r/grok/comments/1s76p1z/grok_is_dead_to_me/",
+      "status": "capture-failed",
+      "error": "Error: source check failed status=403 title= excerpt=You've been blocked by network security.\nTo continue, log in to your Reddit account or use your developer token\n\nIf you think you've been blocked by mistake, file a ticket below and we'll look into it.\nLog in\nFile a tick"
+    },
+    {
+      "id": "VIGIL-INC-000198",
+      "source_url": "https://www.reddit.com/r/grok/comments/1teyg2w/grok_for_cancer/",
+      "status": "capture-failed",
+      "error": "Error: source check failed status=403 title= excerpt=You've been blocked by network security.\nTo continue, log in to your Reddit account or use your developer token\n\nIf you think you've been blocked by mistake, file a ticket below and we'll look into it.\nLog in\nFile a tick"
+    }
+  ]
+}
