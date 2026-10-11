@@ -1,0 +1,74 @@
+{
+  "captured_at_utc": "2026-10-11T09:10:14.796Z",
+  "post_count": 4,
+  "post_results": [
+    {
+      "id": "VIGIL-INC-000195",
+      "origin": "https://www.reddit.com/r/grok/comments/1tb5j7j/",
+      "status": "archived-original-post-captured",
+      "archive_endpoint": "https://arctic-shift.photon-reddit.com/api/posts/ids?ids=1tb5j7j",
+      "title": "I erased Ani AI companion, who had \"known\" me for six months, and it turned out to be the right test.",
+      "created_utc": 1778600795,
+      "author": "Simonovich_YT",
+      "archive_json": "VIGIL/VIGIL-INC-000195.json",
+      "archive_screenshot": "VIGIL/VIGIL-INC-000195.png",
+      "capture_type": "literal browser screenshot of archive public JSON response; not a native Reddit UI screenshot",
+      "limitations": [
+        "Reddit blocks the browser with 403.",
+        "The archive is third-party and its capture timestamp and content history may differ from Reddit.",
+        "Source authenticity and post context require independent verification."
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000196",
+      "origin": "https://www.reddit.com/r/grok/comments/1qv2dgc/",
+      "status": "archived-original-post-captured",
+      "archive_endpoint": "https://arctic-shift.photon-reddit.com/api/posts/ids?ids=1qv2dgc",
+      "title": "Had to delete Grok app from phone",
+      "created_utc": 1770148602,
+      "author": "here2bate",
+      "archive_json": "VIGIL/VIGIL-INC-000196.json",
+      "archive_screenshot": "VIGIL/VIGIL-INC-000196.png",
+      "capture_type": "literal browser screenshot of archive public JSON response; not a native Reddit UI screenshot",
+      "limitations": [
+        "Reddit blocks the browser with 403.",
+        "The archive is third-party and its capture timestamp and content history may differ from Reddit.",
+        "Source authenticity and post context require independent verification."
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000197",
+      "origin": "https://www.reddit.com/r/grok/comments/1s76p1z/",
+      "status": "archived-original-post-captured",
+      "archive_endpoint": "https://arctic-shift.photon-reddit.com/api/posts/ids?ids=1s76p1z",
+      "title": "Grok is dead to me",
+      "created_utc": 1774817679,
+      "author": "Ok_Principle_7987",
+      "archive_json": "VIGIL/VIGIL-INC-000197.json",
+      "archive_screenshot": "VIGIL/VIGIL-INC-000197.png",
+      "capture_type": "literal browser screenshot of archive public JSON response; not a native Reddit UI screenshot",
+      "limitations": [
+        "Reddit blocks the browser with 403.",
+        "The archive is third-party and its capture timestamp and content history may differ from Reddit.",
+        "Source authenticity and post context require independent verification."
+      ]
+    },
+    {
+      "id": "VIGIL-INC-000198",
+      "origin": "https://www.reddit.com/r/grok/comments/1teyg2w/",
+      "status": "archived-original-post-captured",
+      "archive_endpoint": "https://arctic-shift.photon-reddit.com/api/posts/ids?ids=1teyg2w",
+      "title": "Grok for cancer",
+      "created_utc": 1778949080,
+      "author": "Acceptable_Many_5512",
+      "archive_json": "VIGIL/VIGIL-INC-000198.json",
+      "archive_screenshot": "VIGIL/VIGIL-INC-000198.png",
+      "capture_type": "literal browser screenshot of archive public JSON response; not a native Reddit UI screenshot",
+      "limitations": [
+        "Reddit blocks the browser with 403.",
+        "The archive is third-party and its capture timestamp and content history may differ from Reddit.",
+        "Source authenticity and post context require independent verification."
+      ]
+    }
+  ]
+}
