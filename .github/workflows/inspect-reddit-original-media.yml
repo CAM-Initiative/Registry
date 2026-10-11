@@ -1,0 +1,36 @@
+name: Inspect author-attached original Reddit visual
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-reddit-original-media.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the author-attached Reddit source image for evaluation
+        run: |
+          curl -fLsS --max-time 25 -A 'Mozilla/5.0' 'https://i.redd.it/0p6d8qdv8q0h1.png' -o /tmp/original.png || exit 0
+          file /tmp/original.png
+          python3 -m pip -q install pillow
+          python3 - <<'PY'
+          from PIL import Image
+          im=Image.open('/tmp/original.png')
+          print('ORIGINAL_SIZE',im.size,im.format)
+          im.thumbnail((900,700))
+          im.convert('RGB').save('/tmp/thumbnail.jpg',quality=75,optimize=True)
+          PY
+          echo IMAGE_B64_START
+          base64 -w4000 /tmp/thumbnail.jpg
+          echo IMAGE_B64_END
+      - name: Remove one-off workflow
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/inspect-reddit-original-media.yml
+          git commit -m 'chore: remove original-source media inspection workflow' || true
+          git push
