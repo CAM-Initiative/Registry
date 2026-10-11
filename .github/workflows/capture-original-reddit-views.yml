@@ -1,0 +1,96 @@
+name: Capture source-native Grok Reddit posts
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/capture-original-reddit-views.yml']
+permissions:
+  contents: write
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Inspect genuine Reddit or Wayback-rendered original posts
+        run: |
+          cat > authentic.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('fs');
+          const posts=[
+            ['195','1tb5j7j','I erased Ani AI companion'],
+            ['196','1qv2dgc','Had to delete Grok app from phone'],
+            ['197','1s76p1z','Grok is dead to me'],
+            ['198','1teyg2w','Grok for cancer']
+          ];
+          const browserPromise=chromium.launch({headless:true,args:['--no-sandbox']});
+          async function fetchJson(url){
+            try{
+              const x=await fetch(url,{signal:AbortSignal.timeout(10000),headers:{'user-agent':'VIGIL-evidence-research/1.0'}});
+              if(!x.ok) return {error:x.status,url};
+              return await x.json();
+            }catch(e){return {error:String(e).slice(0,100),url}}
+          }
+          (async()=>{
+            const browser=await browserPromise;
+            for(const [num,id,expected] of posts){
+              const original='https://www.reddit.com/r/grok/comments/'+id+'/';
+              const snapshots=[];
+              for(const host of ['www.reddit.com','old.reddit.com']){
+                const url='https://archive.org/wayback/available?url='+encodeURIComponent('https://'+host+'/r/grok/comments/'+id+'/');
+                const a=await fetchJson(url);
+                const closest=a.archived_snapshots?.closest;
+                if(closest?.available&&closest.status==='200')snapshots.push(closest.url);
+                console.log('WAYBACK '+id+' '+host+' '+JSON.stringify({snapshot:closest,problem:a.error}).slice(0,420));
+              }
+              const tests=[
+                original,
+                'https://sh.reddit.com/r/grok/comments/'+id+'/',
+                'https://new.reddit.com/r/grok/comments/'+id+'/',
+                'https://np.reddit.com/r/grok/comments/'+id+'/',
+                'https://www.reddit.com/r/grok/comments/'+id+'/?rdt=1',
+                ...snapshots
+              ];
+              let captured=false;
+              for(const url of [...new Set(tests)]){
+                const page=await browser.newPage({viewport:{width:1420,height:1080},deviceScaleFactor:1,locale:'en-US'});
+                try{
+                  const res=await page.goto(url,{waitUntil:'domcontentloaded',timeout:14500});
+                  await page.waitForTimeout(1000);
+                  const title=await page.title();
+                  const body=(await page.locator('body').innerText({timeout:5000})).slice(0,85000);
+                  const valid=!!res&&res.status()<400&&body.toLowerCase().includes(expected.toLowerCase())
+                    && !/\bYou've been blocked\b|log in to continue|whoa there, pardner|404 - not found/i.test(body.slice(0,1700));
+                  const postNodes=await page.locator('shreddit-post, faceplate-partial, article, .Post, .thing.link, .PostContent').count();
+                  console.log('PROBE '+num+' '+JSON.stringify({url,status:res?.status(),title:title.slice(0,90),valid,postNodes,bodyBeginning:body.slice(0,165)}));
+                  if(!valid)continue;
+                  if(!url.includes('reddit.com')&&!url.includes('web.archive.org'))continue;
+                  const p='VIGIL/VIGIL-INC-000'+num+'.png';
+                  // Genuine rendered post, never a server error, JSON result or regenerated post card.
+                  await page.screenshot({path:p,fullPage:true,timeout:28000});
+                  captured=true;
+                  console.log('CAPTURED '+num+' '+JSON.stringify({source:original,captured_page_url:url,file:p,title}));
+                  break;
+                }catch(e){console.log('ERR '+num+' '+url+' '+String(e).slice(0,125))}
+                finally{await page.close()}
+              }
+              if(!captured)console.log('UNAVAILABLE '+num+' No authenticated/source-native visual post available; do not substitute archival JSON.');
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)})
+          JS
+          node authentic.cjs
+      - name: Commit only validated native source captures and self-remove
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VIGIL/VIGIL-INC-00019*.png || true
+          git rm .github/workflows/capture-original-reddit-views.yml
+          git commit -m 'evidence: retain only genuine Grok Reddit source-post screenshots' || true
+          git push
