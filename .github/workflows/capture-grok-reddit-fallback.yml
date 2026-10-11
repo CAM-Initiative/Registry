@@ -1,0 +1,69 @@
+name: Preserve Reddit source pages via authentic public front ends
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/capture-grok-reddit-fallback.yml"]
+permissions:
+  contents: write
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Capture source with transparent mirror provenance
+        run: |
+          cat > preserve.cjs <<'JS'
+          const {chromium}=require('playwright'),fs=require('fs');
+          const entries=[["195","1tb5j7j","I erased Ani AI companion"],["196","1qv2dgc","Had to delete Grok app"],["197","1s76p1z","Grok is dead to me"],["198","1teyg2w","Grok for cancer"]];
+          (async()=>{
+           const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+           const results=[];
+           for(const [num,post,expected] of entries){
+            const id='VIGIL-INC-000'+num;
+            const origin='https://www.reddit.com/r/grok/comments/'+post+'/';
+            const urls=[
+             'https://old.reddit.com/r/grok/comments/'+post+'/',
+             'https://redlib.catsarch.com/r/grok/comments/'+post,
+             'https://www.redditmedia.com/r/grok/comments/'+post+'/?embed=true',
+             'https://r.jina.ai/https://www.reddit.com/r/grok/comments/'+post+'/'
+            ];
+            let result={id,origin,status:'capture-failed',attempts:[]};
+            for(const url of urls){
+             const page=await browser.newPage({viewport:{width:1330,height:1100},locale:'en-US'});
+             try{
+              const resp=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.waitForTimeout(2200);
+              const title=await page.title();
+              const body=(await page.locator('body').innerText({timeout:15000})).slice(0,250000);
+              if(!resp||resp.status()>=400||!body.toLowerCase().includes(expected.toLowerCase()))throw Error('status '+resp?.status()+' missing original post heading; body '+body.slice(0,80));
+              const postNode=page.locator('shreddit-post,article,.post').first();
+              if(await postNode.count()&&url.includes('reddit'))await postNode.screenshot({path:'VIGIL/'+id+'.png',timeout:30000});else await page.screenshot({path:'VIGIL/'+id+'.png',fullPage:false,timeout:30000});
+              result={id,origin,capture_url:url,status:'browser-captured-from-'+(url.includes('reddit.com')||url.includes('redditmedia')?'reddit':'mirror'),date_utc:new Date().toISOString(),title,filename:id+'.png',limitations:url.includes('reddit.com')?'Rendered original reddit page':'Rendered a third-party public mirror of Reddit post; original is source of record; the capture is not a native Reddit screenshot.'};
+              break;
+             }catch(e){result.attempts.push({url,error:String(e).slice(0,180)})}
+             finally{await page.close()}
+            }
+            results.push(result);
+            console.log('SOURCE_RESULT '+JSON.stringify(result));
+           }
+           await browser.close();
+           fs.writeFileSync('VIGIL/GROK-2026-REDDIT-FALLBACK-CAPTURE-MANIFEST.json',JSON.stringify({capture_mode:'literal browser source page or identified proxy; never reconstructed',entries:results},null,2)+'\n');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node preserve.cjs
+      - name: Preserve captures and remove temporary workflow
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VIGIL/VIGIL-INC-00019*.png VIGIL/GROK-2026-REDDIT-FALLBACK-CAPTURE-MANIFEST.json || true
+          git rm .github/workflows/capture-grok-reddit-fallback.yml
+          git commit -m 'evidence: preserve Reddit Grok source-page captures with mirror provenance' || true
+          git push
