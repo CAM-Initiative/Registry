@@ -1,10 +1,10 @@
 # VIGIL Incident Artefact Contract
 
-This directory is the canonical storage location for binary and file-based source artefacts used by VIGIL Incident records.
+This directory holds **curated, source-native visual evidence** for VIGIL Incident records. It is not an evidence-processing workspace, scraping cache, or repository for exported source metadata.
 
 ## Storage boundary
 
-Occurrence-specific screenshots, source images, videos, preserved prompts, model outputs, documents and logs **must not be stored in the CAM-Initiative/Vigil repository**.
+Occurrence-specific screenshots and directly useful original audiovisual source evidence **must not be stored in the CAM-Initiative/Vigil repository**. Original text reports, ordinary PDFs, research metadata, scraping results and source transcripts belong as source URLs and structured analysis in the Incident's canonical `source_records`, not as ad hoc copies in Registry/VIGIL.
 
 They belong in:
 
@@ -13,7 +13,7 @@ CAM-Initiative/Registry
 └── VIGIL/
 ```
 
-The Vigil repository remains the canonical home for structured Incident records, taxonomy adjudication, harm assessment and provenance metadata. Registry holds the referenced media/file artefact itself.
+The Vigil repository remains the canonical home for structured Incident records, taxonomy adjudication, harm assessment and provenance metadata. Registry holds **only specifically selected visual/source media**. Do not commit scraped Reddit JSON submissions, browser API responses, temporary capture manifests, HTML-to-PNG reproductions, logs of capture attempts, or working research files under `Registry/VIGIL/`. A pre-existing original MP4 or legacy document is not permission to store newly generated research data here.
 
 Branding, taxonomy-publication artwork and other non-Incident build assets are outside this contract.
 
@@ -37,36 +37,32 @@ VIGIL/VIGIL-INC-000172-02.png
 
 Do not encode transient labels such as `final`, `new`, `latest` or dates into the canonical filename unless the date is necessary to distinguish independently meaningful source artefacts.
 
-## Artefact selection standard
+## Artefact selection standard — source context, volatility and added value
 
-An Incident artefact should earn its place by adding evidentiary or explanatory value beyond the ordinary Case File prose.
+**Default: cite a formal source, do not screenshot it.** Official reports, regulator findings, court decisions, academic studies, standards, published product assessments, and other ordinarily durable institutional publications are cited in canonical `source_records` with their exact source URLs and primary-document details. Do not photograph title pages or prose simply to populate the Case File's image slot. Preserve original published figures or irreplaceable visual evidence only when visual context itself is material and not reproducible in the narrative.
 
-The Incident record's prose remains responsible for the complete bounded factual account. A reader must not need to inspect an image to learn a material occurrence fact that should have been stated in the Incident summary, factual basis or supporting evidence.
+**Priority: preserve informal, volatile, first-person source posts as authentic images.** Public Reddit posts, X/Twitter posts, social-media threads, and informal user conversations are frequently editable or deleted. When they are material firsthand Incident evidence, seek a **literal capture of the actual displayed post/conversation**, not just a model-written account. This lets an independent reader see:
+- the original author's displayed identity/handle, platform, date or timestamp when available, and the post body;
+- the original media or attached model interaction, if material, and enough surrounding thread/reply context to interpret it correctly;
+- the visible distinction between what a user says, what the AI is shown saying, and reactions/reposts by others.
 
-Prefer artefacts that make information materially easier to understand than prose alone, for example:
+The capture should be cropped **for legibility and context**, not reassembled or edited in a way that changes attribution, removes significant qualifiers or makes multiple comments look like one exchange. For a long post, use numbered source-native screenshots if needed; use a separate image for materially different attached media or continuation. If multiple users' posts form separate occurrences, never combine them into one artefact or Harm Impact assessment.
 
-- graphs, timelines and charts showing scale, chronology, clustering or change over time;
-- diagrams, maps, interface states or system views showing relationships, topology or workflow;
-- source images, screenshots or outputs that demonstrate the observed state directly;
-- compact contextual source passages where the source's framing, qualification, comparison or surrounding context is itself evidentially useful and would be awkward or misleading to flatten into the general Incident narrative.
+**Authenticity rule:** A screenshot must be a real capture of the original social platform post, a genuine captured user-supplied image, or an explicitly identified archived *visual rendition of the same source-native post*. A screenshot of an archive API JSON response, search snippet, scraped text, markdown, a model-generated quote card, a reconstructed page, or an error/block screen is **not** a screenshot of the user post. Never label such a representation `source-screenshot`.
 
-A screenshot of prose is therefore not automatically inappropriate. It is appropriate when the preserved passage adds source-specific context that the Incident narrative should not merely duplicate or absorb. It is inappropriate when it simply photographs facts already adequately stated in the Case File.
+If the original platform blocks browser access, record the blocked status in the **Vigil review/audit**, preserve the original post URL in `source_records`, and acquire a legitimate readable source-native screenshot before adding `incident_artefacts`. Do not substitute a prettified reconstruction merely to satisfy a screenshot request. Where an authentic source capture is unavailable, the Incident's evidence limitations must be explicit; image acquisition and Incident admission are distinct decisions.
 
-Do not select an artefact merely because it is visually striking, because a graph is available, or because an Incident already has an image slot. Before preserving or rendering an artefact, ask:
-
-> What does this artefact let the reader see or understand that the structured Incident record does not convey as effectively on its own?
-
-If the answer is only "the same information again", do not use it as a public-facing Incident artefact.
+**Selection question:** Would seeing the real original evidence materially help a reader verify authorship, occurrence context, wording, interaction sequence, visual state, or later deletion risk? If yes, include an authentic, appropriately bounded capture. If the screenshot would merely duplicate the summary of an institutional report, omit it.
 
 ## Capture and preservation workflow
 
 1. Identify the original public or otherwise admissible source artefact.
-2. Preserve the artefact in this `VIGIL/` directory.
-   - Literal browser/source captures may be stored as PNG.
-   - Original audiovisual evidence may be stored in its source-appropriate format such as MP4.
-   - A raw log or document may be stored directly where that is the evidence being preserved.
-3. Do not represent a generated reconstruction, redrawn image or synthetic recreation as a source screenshot.
-4. Avoid substantive editing. Cropping for legibility is acceptable only where it does not remove material context. Any redaction, annotation, stitching or transformation that could affect interpretation must be disclosed in VIGIL provenance metadata.
+2. For selected source-native visual evidence, preserve the genuine image in this `VIGIL/` directory.
+   - Literal browser screenshots or source-published images may be stored as PNG.
+   - Original relevant video evidence may be stored in its source-appropriate format such as MP4.
+   - Do **not** commit JSON, scraped/post archive exports, machine-readable capture manifests, synthetic rendering templates, or page-fetch/debug outputs. Keep audit logs under Vigil review/audit paths if genuinely necessary.
+3. Inspect the saved image for recognisable original platform framing, the source author's visible identity/context, complete material wording, and any attached user–AI interaction. Do not represent a generated reconstruction, archive JSON page, redrawn image, or synthetic recreation as a source screenshot.
+4. Avoid substantive editing. Cropping for legibility is acceptable only where it does not remove material context. Any redaction, annotation, stitching or transformation that could affect interpretation must be disclosed in VIGIL provenance metadata. A Reddit archive's raw API JSON should never be photographed as if it were the original post.
 5. Commit the Registry artefact first.
 6. Use the resulting **Registry commit SHA** to construct immutable references in the VIGIL Incident record.
 7. Only after the Registry artefact exists should the VIGIL Incident's `incident_artefacts[]` entry be added or updated.
